@@ -44,6 +44,7 @@ public class SessionHandler extends SimpleChannelHandler {
 
     private static final Logger     logger = LoggerFactory.getLogger(SessionHandler.class);
     private CanalServerWithEmbedded embeddedServer;
+    private int cnt = 0;
 
     public SessionHandler(){
     }
@@ -138,6 +139,14 @@ public class SessionHandler extends SimpleChannelHandler {
                         if (message.getId() != -1 && !CollectionUtils.isEmpty(message.getEntries())) {
                             for (Entry entry : message.getEntries()) {
                                 messageBuilder.addMessages(entry.toByteString());
+                                //TODO： hard code to 3000 is according to traffic, not accurate by useful now.
+                                if(cnt > 3000) {
+                                    long exeutime = entry.getHeader().getExecuteTime();
+                                    long now = System.currentTimeMillis();
+                                    System.out.println(now + "\t" + exeutime + "\t" + (now - exeutime));
+                                    cnt = 0;
+                                }
+                                cnt+=1;
                             }
                         }
                         packetBuilder.setBody(messageBuilder.build().toByteString());
